@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>练习</title>
+	<style type="text/css">
+		body{
+			text-align: center;
+		}
+		td{
+			text-align: center;
+			height: 50px;
+		}
+		table{
+			margin: 10px auto;
+		}
+	</style>
+	<script type="text/javascript">
+		let errorList=[];
+		let editItem={};
+		let keys = ['text','result'];
+		let isWord=true;
+		function switchText(){
+			isWord=!isWord;
+			let keyborard1=document.getElementById('keyboard1');
+			if (isWord) {
+				keys = ['text','result'];
+				setKeyBoard1()
+			} else {
+				keys = ['result','text'];
+				setKeyBoard2()
+			}
+			resetText()
+		}
+		let datas=[{text:"A",result:".-"}, {text:"B",result:"-..."}, {text:"C",result:"-.-."}, {text:"D",result:"-.."}, {text:"E",result:"."}, {text:"F",result:"..-."}, {text:"G",result:"--."}, {text:"H",result:"...."}, {text:"I",result:".."}, {text:"J",result:".---"}, {text:"K",result:"-.-"}, {text:"L",result:".-.."}, {text:"M",result:"--"}, {text:"N",result:"-."}, {text:"O",result:"---"}, {text:"P",result:".--."}, {text:"Q",result:"--.-"}, {text:"R",result:".-."}, {text:"S",result:"..."}, {text:"T",result:"-"}, {text:"U",result:"..-"}, {text:"V",result:"...-"}, {text:"W",result:".--"}, {text:"X",result:"-..-"}, {text:"Y",result:"-.--"}, {text:"Z",result:"--.."}, {text:"1",result:".----"}, {text:"2",result:"..---"}, {text:"3",result:"...--"}, {text:"4",result:"....-"}, {text:"5",result:"....."}, {text:"6",result:"-...."}, {text:"7",result:"--..."}, {text:"8",result:"---.."}, {text:"9",result:"----."}, {text:"0",result:"-----"} ];
+		function testResult() {
+			let answer = document.getElementsByName('inputResult');
+			let resultEle = document.getElementById('result');
+			answer = answer[0].value;
+			if (answer === editItem[keys[1]]) {
+				resultEle.innerHTML='正确';
+				resultEle.style.color="#00ff00";
+				setTimeout(function() {resetText();}, 1000);
+			} else {
+				resultEle.innerHTML='【'+editItem[keys[1]]+'】';
+				resultEle.style.color="#ff0000";
+				errorList.push({text:editItem[keys[0]],ok:editItem[keys[1]],error:answer});
+			}
+		}
+		function resetText() {
+			const index = parseInt(Math.random()*datas.length);
+			editItem = datas[index];
+			let textEle = document.getElementById('text');
+			let resultEle = document.getElementById('result');
+			let inputResultEle = document.getElementsByName('inputResult');
+			textEle.innerHTML=editItem[keys[0]];
+			resultEle.innerHTML='';
+			inputResultEle[0].value='';
+			inputResultEle[0].focus();
+		}
+		function showError() {
+			let errorTableEle = document.getElementById('errorTable');
+			let errorListTr='<tr><th>序号</th><th>文本</th><th>正确</th><th>错误</th></tr>';
+			for (let i = 0; i < errorList.length; i++) {
+				const {text,ok,error} = errorList[i];
+				errorListTr+='<tr><th>'+i+'</th><th>'+text+'</th><th>'+ok+'</th><th>'+error+'</th></tr>';
+			}
+			errorTableEle.innerHTML=errorListTr;
+		}
+		function removeLastValue(){
+			let inputResultEle = document.getElementsByName('inputResult');
+			inputResultEle[0].value=inputResultEle[0].value.substr(0,inputResultEle[0].value.length-1);
+		}
+		function appendValue(value){
+			let inputResultEle = document.getElementsByName('inputResult');
+			inputResultEle[0].value=inputResultEle[0].value+value;
+			if (!isWord) {
+				testResult();
+				// 反向测试
+			} else {
+				// 字母正向测试
+				if (editItem.result.length <= inputResultEle[0].value.length) {
+					testResult();
+				}
+			}
+		}
+		let hour=0,minutes=0,seconds=0;
+		function setTime() {
+			seconds+=1;
+			let isChangeMinutes=false;
+			let isChangeHour=false;
+			let secondsEle=document.getElementById('seconds');
+			let minutesEle=document.getElementById('minutes');
+			let hourEle=document.getElementById('hour');
+			if (seconds<10) {
+				secondsEle.innerHTML="0"+seconds;
+			} else if (seconds === 60) {
+				secondsEle.innerHTML="00";
+				seconds=0;
+				minutes+=1;
+				isChangeMinutes=true;
+			} else {
+				secondsEle.innerHTML=seconds;
+			}
+			if (isChangeMinutes) {
+				if (minutes<10) {
+					minutesEle.innerHTML="0"+minutes;
+				} else if (minutes === 60) {
+					minutesEle.innerHTML="00";
+					minutes=0;
+					hour+=1;
+					isChangeHour=true;
+				} else {
+					minutesEle.innerHTML=minutes;
+				}
+			}
+			if (isChangeHour) {
+				if (hour<10) {
+					hourEle.innerHTML="0"+hour;
+				} else {
+					hourEle.innerHTML=hour;
+				}
+			}
+			setTimeout(function() {setTime()}, 1000);
+		}
+		function setKeyBoard1(){
+			let keyboard=document.getElementById('keyboard');
+			keyboard.innerHTML=`<td><button style="width:30px; margin-right: 20px;font-weight: 900;" onclick="appendValue('-')"> - </button><button style="width:30px; font-weight: 900;" onclick="appendValue('.')"> · </button></td><td><button onclick="removeLastValue()">删除</button></td>`
+		}
+		function setKeyBoard2() {
+			let keyboard=document.getElementById('keyboard');
+			let keyboards='<td>';
+			for (let i = 0; i < datas.length; i++) {
+				const {text} = datas[i];
+				if (i%6==0 && i) {
+					keyboards+='<br>'
+				}
+				keyboards+='<button style="width:30px" onclick="appendValue(\''+text+'\')"> '+text+' </button>';
+				
+			}
+			keyboard.innerHTML=keyboards+'</td><td><button onclick="removeLastValue()">删除</button></td>';
+		}
+		window.onload=()=>{
+			resetText();
+			setTime();
+			setKeyBoard1()
+		}
+	</script>
+</head>
+<body>
+	计时：<span id="hour">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+<table>
+	<tr><td id="text"></td><td><button onclick="resetText()">下一个</button><br><button onclick="switchText()">切换</button></td></tr>
+	<tr><td id="answer"><input type="text" name="inputResult"/></td><td></td></tr>
+	<tr><td>校验结果</td><td id="result"></td></tr>
+	<tr id="keyboard"></tr>
+</table>
+<button onclick="showError()">查看错误列表</button>
+<table id="errorTable" border="1"></table>
+</body>
+</html>
