@@ -20,31 +20,70 @@
 		let errorList=[];
 		let editItem={};
 		let keys = ['text','result'];
-		let isWord=true;
+		let textType=1;//['text','result'],['result','text'],['text','result']
 		function switchText(){
-			isWord=!isWord;
+			textType+=1;
+			if (textType === 4) {
+				textType = 1;
+			}
 			let keyborard1=document.getElementById('keyboard1');
-			if (isWord) {
+			let switchResult=document.getElementById('switchResult');
+			if (textType === 1) {
 				keys = ['text','result'];
-				setKeyBoard1()
-			} else {
+				setKeyBoard1();
+				switchResult.style.display="none";
+			} else if(textType === 2) {
 				keys = ['result','text'];
 				setKeyBoard2()
+				switchResult.style.display="none";
+			} else {
+				keys = ['text','result'];
+				switchResult.style.display="inline-block";
+				let resultTypeEle = document.getElementsByName('resultType');
+				resultTypeEle[0].checked=true;
+				setKeyBoard2();
 			}
-			resetText()
+			resetText();
 		}
 		let datas=[{text:"A",result:".-"}, {text:"B",result:"-..."}, {text:"C",result:"-.-."}, {text:"D",result:"-.."}, {text:"E",result:"."}, {text:"F",result:"..-."}, {text:"G",result:"--."}, {text:"H",result:"...."}, {text:"I",result:".."}, {text:"J",result:".---"}, {text:"K",result:"-.-"}, {text:"L",result:".-.."}, {text:"M",result:"--"}, {text:"N",result:"-."}, {text:"O",result:"---"}, {text:"P",result:".--."}, {text:"Q",result:"--.-"}, {text:"R",result:".-."}, {text:"S",result:"..."}, {text:"T",result:"-"}, {text:"U",result:"..-"}, {text:"V",result:"...-"}, {text:"W",result:".--"}, {text:"X",result:"-..-"}, {text:"Y",result:"-.--"}, {text:"Z",result:"--.."}, {text:"1",result:".----"}, {text:"2",result:"..---"}, {text:"3",result:"...--"}, {text:"4",result:"....-"}, {text:"5",result:"....."}, {text:"6",result:"-...."}, {text:"7",result:"--..."}, {text:"8",result:"---.."}, {text:"9",result:"----."}, {text:"0",result:"-----"} ];
+		function testSuccess(){
+			// 验证成功
+			let resultEle = document.getElementById('result');
+			resultEle.innerHTML='正确';
+			resultEle.style.color="#00ff00";
+			setTimeout(function() {resetText();}, 1000);
+		}
+		function testFail(index){
+			// 验证失败
+			let resultEle = document.getElementById('result');
+			resultEle.style.color="#ff0000";
+			resultEle.innerHTML='【'+editItem[keys[index]]+'】';
+			setTimeout(function() {resetText();}, 5000);
+		}
 		function testResult() {
 			let answer = document.getElementsByName('inputResult');
-			let resultEle = document.getElementById('result');
 			answer = answer[0].value;
-			if (answer === editItem[keys[1]]) {
-				resultEle.innerHTML='正确';
-				resultEle.style.color="#00ff00";
-				setTimeout(function() {resetText();}, 1000);
+			if (textType === 3) {
+				let resultTypeEle = document.getElementsByName('resultType');
+				if (resultTypeEle[0].checked) {//输入字母，通过语音对字母验证
+					if(answer===editItem[keys[0]]){
+						testSuccess()
+					} else {
+						testFail(0)
+						errorList.push({text:editItem[keys[0]]+'【音频】',ok:editItem[keys[0]],error:answer});
+					}
+				} else {//输入摩斯，通过语音对摩斯验证
+					if(answer===editItem[keys[1]]){
+						testSuccess()
+					} else {
+						testFail(1)
+						errorList.push({text:editItem[keys[0]]+'【音频】',ok:editItem[keys[1]],error:answer});
+					}
+				}
+			} else if (answer === editItem[keys[1]]) {
+				testSuccess();
 			} else {
-				resultEle.innerHTML='【'+editItem[keys[1]]+'】';
-				resultEle.style.color="#ff0000";
+				testFail(1);
 				errorList.push({text:editItem[keys[0]],ok:editItem[keys[1]],error:answer});
 			}
 		}
@@ -54,17 +93,24 @@
 			let textEle = document.getElementById('text');
 			let resultEle = document.getElementById('result');
 			let inputResultEle = document.getElementsByName('inputResult');
-			textEle.innerHTML=editItem[keys[0]];
+			if (textType !== 3) {
+				textEle.innerHTML=editItem[keys[0]];
+			} else {
+				textEle.innerHTML=`<audio controls autoplay>
+			  	<source src="./${editItem[keys[0]]}.mp3" type="audio/mpeg">
+			  	<embed height="50" width="100" src="./${editItem[keys[0]]}.mp3">
+				</audio>`;
+			}
 			resultEle.innerHTML='';
 			inputResultEle[0].value='';
 			inputResultEle[0].focus();
 		}
 		function showError() {
 			let errorTableEle = document.getElementById('errorTable');
-			let errorListTr='<tr><th>序号</th><th>文本</th><th>正确</th><th>错误</th></tr>';
+			let errorListTr='';
 			for (let i = 0; i < errorList.length; i++) {
 				const {text,ok,error} = errorList[i];
-				errorListTr+='<tr><th>'+i+'</th><th>'+text+'</th><th>'+ok+'</th><th>'+error+'</th></tr>';
+				errorListTr+='<tr><td>'+i+'</td><td>'+text+'</td><td>'+ok+'</td><td>'+error+'</td></tr>';
 			}
 			errorTableEle.innerHTML=errorListTr;
 		}
@@ -75,12 +121,21 @@
 		function appendValue(value){
 			let inputResultEle = document.getElementsByName('inputResult');
 			inputResultEle[0].value=inputResultEle[0].value+value;
-			if (!isWord) {
+			if (textType === 2) {
 				testResult();
 				// 反向测试
-			} else {
+			} else if (textType === 1) {
 				// 字母正向测试
 				if (editItem.result.length <= inputResultEle[0].value.length) {
+					testResult();
+				}
+			} else {
+				let resultTypeEle = document.getElementsByName('resultType');
+				let worldResult=resultTypeEle[0].checked;
+				// let morseResult=resultTypeEle[1].checked;
+				if (worldResult) {
+					testResult();
+				} else if (editItem.result.length <= inputResultEle[0].value.length) {
 					testResult();
 				}
 			}
@@ -143,19 +198,28 @@
 		}
 		window.onload=()=>{
 			resetText();
-			setTime();
+			// setTime();
 			setKeyBoard1()
 		}
 	</script>
 </head>
 <body>
-	计时：<span id="hour">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
-<table>
-	<tr><td id="text"></td><td><button onclick="resetText()">下一个</button><br><button onclick="switchText()">切换</button></td></tr>
-	<tr><td id="answer"><input type="text" name="inputResult"/></td><td id="result"></td></tr>
+	<!-- 计时：<span id="hour">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span> -->
+<table width="500">
+	<tr><td id="switchResult" style="display:none;"><input type="radio" name="resultType" value="text" checked='checked' onclick="setKeyBoard2()">字母 <input type="radio" name="resultType" value="result" onclick="setKeyBoard1()">摩斯</td></tr>
+	<tr><td id="text"></td><td><button onclick="switchText()">切换</button></td></tr>
+	<tr><td id="answer"><input type="text" name="inputResult"/></td><td><button onclick="resetText()">下一个</button></td></tr>
+	<tr><td>校验结果</td><td id="result"></td></tr>
 	<tr id="keyboard"></tr>
 </table>
 <button onclick="showError()">查看错误列表</button>
-<table id="errorTable" border="1"></table>
+<table border="1" width="500">
+	<thead>
+		<tr>
+			<tr><th>序号</th><th>文本</th><th>正确</th><th>错误输入</th></tr>
+		</tr>
+	</thead>
+	<tbody id="errorTable"></tbody>
+</table>
 </body>
 </html>
