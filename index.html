@@ -13,7 +13,7 @@
 			height: 50px;
 		}
 		table{
-			margin: 10px auto;
+			width:100%;
 		}
 	</style>
 	<script type="text/javascript">
@@ -205,7 +205,7 @@
 </head>
 <body>
 	<!-- 计时：<span id="hour">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span> -->
-<table width="500">
+<table>
 	<tr><td id="switchResult" style="display:none;"><input type="radio" name="resultType" value="text" checked='checked' onclick="setKeyBoard2()">字母 <input type="radio" name="resultType" value="result" onclick="setKeyBoard1()">摩斯</td></tr>
 	<tr><td id="text"></td><td><button onclick="switchText()">切换</button></td></tr>
 	<tr><td id="answer"><input type="text" name="inputResult"/></td><td><button onclick="resetText()">下一个</button></td></tr>
@@ -213,7 +213,7 @@
 	<tr id="keyboard"></tr>
 </table>
 <button onclick="showError()">查看错误列表</button>
-<table border="1" width="500">
+<table border="1">
 	<thead>
 		<tr>
 			<tr><th>序号</th><th>文本</th><th>正确</th><th>错误输入</th></tr>
