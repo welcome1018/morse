@@ -208,7 +208,7 @@
 <table>
 	<tr><td id="switchResult" style="display:none;"><input type="radio" name="resultType" value="text" checked='checked' onclick="setKeyBoard2()">字母 <input type="radio" name="resultType" value="result" onclick="setKeyBoard1()">摩斯</td></tr>
 	<tr><td id="text"></td><td><button onclick="switchText()">切换</button></td></tr>
-	<tr><td id="answer"><input type="text" name="inputResult"/></td><td><button onclick="resetText()">下一个</button></td></tr>
+	<tr><td id="answer"><input type="text" name="inputResult" readonly/></td><td><button onclick="resetText()">下一个</button></td></tr>
 	<tr><td>校验结果</td><td id="result"></td></tr>
 	<tr id="keyboard"></tr>
 </table>
